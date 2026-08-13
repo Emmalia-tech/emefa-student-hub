@@ -144,3 +144,69 @@ body {
 .upload-button:hover {
   background-color: #e0e3ff;
 }
+.dashboard-container {
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 0 20px;
+}
+
+.dashboard-title {
+  font-size: 28px;
+  margin-bottom: 24px;
+  color: #1a1a1a;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background-color: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #4f46e5;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.progress-bar-section {
+  background-color: #ffffff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.progress-label {
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.progress-bar-bg {
+  background-color: #eee;
+  border-radius: 8px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background-color: #4f46e5;
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}

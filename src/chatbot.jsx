@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Chatbot() {
+function Chatbot({ onActivity }) {
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Hi! I\'m your AI study assistant. Ask me anything about your coursework.' }
   ])
@@ -13,6 +13,7 @@ function Chatbot() {
     const userMessage = { sender: 'user', text: input }
     setMessages([...messages, userMessage])
     setInput('')
+    onActivity()
 
     setTimeout(() => {
       setMessages(prev => [...prev, { sender: 'bot', text: 'This is a placeholder reply. AI responses coming soon!' }])
@@ -48,6 +49,7 @@ function Chatbot() {
 
     const fileMessage = { sender: 'user', text: `📎 Uploaded: ${file.name}` }
     setMessages(prev => [...prev, fileMessage])
+    onActivity()
 
     setTimeout(() => {
       setMessages(prev => [...prev, { sender: 'bot', text: `I received "${file.name}". File analysis coming soon!` }])

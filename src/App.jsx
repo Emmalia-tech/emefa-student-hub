@@ -1,6 +1,23 @@
+import { useState } from 'react'
 import Chatbot from './Chatbot'
+import Dashboard from './Dashboard'
 
 function App() {
+  const [stats, setStats] = useState({
+    hoursStudied: 0,
+    topicsCompleted: 0,
+    currentStreak: 1,
+    goal: 20
+  })
+
+  const addStudyActivity = () => {
+    setStats(prev => ({
+      ...prev,
+      topicsCompleted: prev.topicsCompleted + 1,
+      hoursStudied: prev.hoursStudied + 0.5
+    }))
+  }
+
   return (
     <div className="landing">
       <nav className="navbar">
@@ -13,7 +30,8 @@ function App() {
         <button className="cta-button">Get Started</button>
       </header>
 
-      <Chatbot />
+      <Dashboard stats={stats} />
+      <Chatbot onActivity={addStudyActivity} />
     </div>
   )
 }
