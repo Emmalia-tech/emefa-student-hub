@@ -5,6 +5,7 @@ function Chatbot() {
     { sender: 'bot', text: 'Hi! I\'m your AI study assistant. Ask me anything about your coursework.' }
   ])
   const [input, setInput] = useState('')
+  const [isListening, setIsListening] = useState(false)
 
   const handleSend = () => {
     if (input.trim() === '') return
@@ -16,6 +17,29 @@ function Chatbot() {
     setTimeout(() => {
       setMessages(prev => [...prev, { sender: 'bot', text: 'This is a placeholder reply. AI responses coming soon!' }])
     }, 500)
+  }
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+
+    if (!SpeechRecognition) {
+      alert('Voice input is not supported in this browser. Try Chrome.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.interimResults = false
+
+    recognition.onstart = () => setIsListening(true)
+    recognition.onend = () => setIsListening(false)
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setInput(transcript)
+    }
+
+    recognition.start()
   }
 
   return (
@@ -38,6 +62,9 @@ function Chatbot() {
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Type your question..."
         />
+        <button onClick={handleVoiceInput} className="mic-button">
+          {isListening ? '🔴' : '🎤'}
+        </button>
         <button onClick={handleSend}>Send</button>
       </div>
     </div>
