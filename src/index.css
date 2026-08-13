@@ -132,3 +132,15 @@ body {
   color: #4f46e5 !important;
   padding: 0 16px !important;
 }
+.upload-button {
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  background-color: #eef0ff;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.upload-button:hover {
+  background-color: #e0e3ff;
+}

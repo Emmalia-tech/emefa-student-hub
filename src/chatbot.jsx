@@ -42,6 +42,18 @@ function Chatbot() {
     recognition.start()
   }
 
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    const fileMessage = { sender: 'user', text: `📎 Uploaded: ${file.name}` }
+    setMessages(prev => [...prev, fileMessage])
+
+    setTimeout(() => {
+      setMessages(prev => [...prev, { sender: 'bot', text: `I received "${file.name}". File analysis coming soon!` }])
+    }, 500)
+  }
+
   return (
     <div className="chatbot-container">
       <div className="chatbot-header">Emefa AI Assistant</div>
@@ -55,6 +67,10 @@ function Chatbot() {
       </div>
 
       <div className="chatbot-input-area">
+        <label className="upload-button">
+          📎
+          <input type="file" onChange={handleFileUpload} hidden />
+        </label>
         <input
           type="text"
           value={input}
