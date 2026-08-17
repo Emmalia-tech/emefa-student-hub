@@ -1,14 +1,21 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Chatbot from './Chatbot'
 import Dashboard from './Dashboard'
 
 function App() {
-  const [stats, setStats] = useState({
-    hoursStudied: 0,
-    topicsCompleted: 0,
-    currentStreak: 1,
-    goal: 20
+  const [stats, setStats] = useState(() => {
+    const saved = localStorage.getItem('emefaStats')
+    return saved ? JSON.parse(saved) : {
+      hoursStudied: 0,
+      topicsCompleted: 0,
+      currentStreak: 1,
+      goal: 20
+    }
   })
+
+  useEffect(() => {
+    localStorage.setItem('emefaStats', JSON.stringify(stats))
+  }, [stats])
 
   const addStudyActivity = () => {
     setStats(prev => ({
