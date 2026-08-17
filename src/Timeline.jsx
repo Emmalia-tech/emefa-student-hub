@@ -7,10 +7,35 @@ function Timeline({ t }) {
   })
   const [taskName, setTaskName] = useState('')
   const [dueDate, setDueDate] = useState('')
+  const [notifPermission, setNotifPermission] = useState(Notification.permission)
 
   useEffect(() => {
     localStorage.setItem('emefaTasks', JSON.stringify(tasks))
   }, [tasks])
+
+  useEffect(() => {
+    if (notifPermission !== 'granted') return
+
+    tasks.forEach(task => {
+      const daysLeft = getDaysLeft(task.dueDate)
+      const alreadyNotified = localStorage.getItem(`notified-${task.id}`)
+
+      if ((daysLeft === 1 || daysLeft === 0) && !alreadyNotified) {
+        new Notification('Emefa Student Hub Reminder', {
+          body: daysLeft === 0
+            ? `"${task.name}" is due today!`
+            : `"${task.name}" is due tomorrow!`
+        })
+        localStorage.setItem(`notified-${task.id}`, 'true')
+      }
+    })
+  }, [tasks, notifPermission])
+
+  const requestNotificationPermission = () => {
+    Notification.requestPermission().then(permission => {
+      setNotifPermission(permission)
+    })
+  }
 
   const addTask = () => {
     if (taskName.trim() === '' || dueDate === '') return
@@ -28,6 +53,7 @@ function Timeline({ t }) {
 
   const deleteTask = (id) => {
     setTasks(tasks.filter(task => task.id !== id))
+    localStorage.removeItem(`notified-${id}`)
   }
 
   const getDaysLeft = (dueDate) => {
@@ -45,6 +71,15 @@ function Timeline({ t }) {
   return (
     <div className="timeline-container">
       <h2 className="dashboard-title">{t.deadlines}</h2>
+
+      {notifPermission !== 'granted' && (
+        <div className="notif-banner">
+          <p>Enable notifications to get reminded about upcoming deadlines.</p>
+          <button onClick={requestNotificationPermission} className="notif-enable-button">
+            Enable Notifications
+          </button>
+        </div>
+      )}
 
       <div className="timeline-input-row">
         <input

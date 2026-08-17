@@ -376,3 +376,36 @@ body {
 .timeline-delete:hover {
   color: #e11d48;
 }
+.notif-banner {
+  background-color: #fff4e0;
+  border: 1px solid #fcd34d;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.notif-banner p {
+  font-size: 14px;
+  color: #92400e;
+  margin: 0;
+}
+
+.notif-enable-button {
+  background-color: #f59e0b;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.notif-enable-button:hover {
+  background-color: #d97706;
+}
