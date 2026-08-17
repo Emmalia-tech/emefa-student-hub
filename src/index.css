@@ -234,3 +234,26 @@ body {
   border-radius: 6px;
   font-size: 14px;
 }
+.quote-container {
+  max-width: 600px;
+  margin: 40px auto 0;
+  padding: 24px;
+  background-color: #eef0ff;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.quote-text {
+  font-size: 18px;
+  font-style: italic;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.quote-label {
+  font-size: 13px;
+  color: #4f46e5;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Chatbot from './Chatbot'
 import Dashboard from './Dashboard'
+import Quote from './Quote'
 
 function App() {
   const [stats, setStats] = useState(() => {
@@ -44,6 +45,7 @@ function App() {
         <button className="cta-button">Get Started</button>
       </header>
 
+      <Quote />
       <Dashboard stats={stats} updateGoal={updateGoal} />
       <Chatbot onActivity={addStudyActivity} />
     </div>
