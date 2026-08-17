@@ -1,5 +1,12 @@
-function Dashboard({ stats }) {
+function Dashboard({ stats, updateGoal }) {
   const progressPercent = Math.min((stats.hoursStudied / stats.goal) * 100, 100)
+
+  const handleGoalChange = (e) => {
+    const newGoal = Number(e.target.value)
+    if (newGoal > 0) {
+      updateGoal(newGoal)
+    }
+  }
 
   return (
     <div className="dashboard-container">
@@ -23,7 +30,21 @@ function Dashboard({ stats }) {
       </div>
 
       <div className="progress-bar-section">
-        <p className="progress-label">Weekly Goal: {stats.hoursStudied}h / {stats.goal}h</p>
+        <div className="goal-header">
+          <p className="progress-label">Weekly Goal: {stats.hoursStudied}h / {stats.goal}h</p>
+          <div className="goal-edit">
+            <label htmlFor="goalInput">Set goal:</label>
+            <input
+              id="goalInput"
+              type="number"
+              min="1"
+              value={stats.goal}
+              onChange={handleGoalChange}
+              className="goal-input"
+            />
+            <span>h</span>
+          </div>
+        </div>
         <div className="progress-bar-bg">
           <div className="progress-bar-fill" style={{ width: `${progressPercent}%` }}></div>
         </div>

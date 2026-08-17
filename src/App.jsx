@@ -25,6 +25,13 @@ function App() {
     }))
   }
 
+  const updateGoal = (newGoal) => {
+    setStats(prev => ({
+      ...prev,
+      goal: newGoal
+    }))
+  }
+
   return (
     <div className="landing">
       <nav className="navbar">
@@ -37,7 +44,7 @@ function App() {
         <button className="cta-button">Get Started</button>
       </header>
 
-      <Dashboard stats={stats} />
+      <Dashboard stats={stats} updateGoal={updateGoal} />
       <Chatbot onActivity={addStudyActivity} />
     </div>
   )
