@@ -3,6 +3,7 @@ import Chatbot from './Chatbot'
 import Dashboard from './Dashboard'
 import Quote from './Quote'
 import Timeline from './Timeline'
+import { translations } from './translations'
 
 function getTodayString() {
   const today = new Date()
@@ -32,6 +33,16 @@ function calculateStreak(lastVisit, currentStreak) {
 }
 
 function App() {
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('emefaLanguage') || 'en'
+  })
+
+  const t = translations[language]
+
+  useEffect(() => {
+    localStorage.setItem('emefaLanguage', language)
+  }, [language])
+
   const [stats, setStats] = useState(() => {
     const saved = localStorage.getItem('emefaStats')
     const parsed = saved ? JSON.parse(saved) : {
@@ -74,18 +85,37 @@ function App() {
     <div className="landing">
       <nav className="navbar">
         <h1 className="logo">Emefa Student Hub</h1>
+        <select
+          className="language-select"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+        >
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+          <option value="ewe">Eʋegbe</option>
+          <option value="twi">Twi</option>
+          <option value="ga">Ga</option>
+          <option value="pt">Português</option>
+          <option value="de">Deutsch</option>
+          <option value="it">Italiano</option>
+          <option value="ar">العربية</option>
+          <option value="sw">Kiswahili</option>
+          <option value="zh">中文</option>
+          <option value="hi">हिन्दी</option>
+        </select>
       </nav>
 
       <header className="hero">
-        <h2>Your Journey to Academic Excellence Starts Here</h2>
-        <p>Learn smarter, track your progress, and stay motivated — powered by AI.</p>
-        <button className="cta-button">Get Started</button>
+        <h2>{t.heroTitle}</h2>
+        <p>{t.heroSubtitle}</p>
+        <button className="cta-button">{t.getStarted}</button>
       </header>
 
       <Quote />
-      <Dashboard stats={stats} updateGoal={updateGoal} />
-      <Timeline />
-      <Chatbot onActivity={addStudyActivity} />
+      <Dashboard stats={stats} updateGoal={updateGoal} t={t} />
+      <Timeline t={t} />
+      <Chatbot onActivity={addStudyActivity} t={t} />
     </div>
   )
 }

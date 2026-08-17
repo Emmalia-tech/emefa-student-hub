@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-function Timeline() {
+function Timeline({ t }) {
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem('emefaTasks')
     return saved ? JSON.parse(saved) : []
@@ -44,12 +44,12 @@ function Timeline() {
 
   return (
     <div className="timeline-container">
-      <h2 className="dashboard-title">Deadlines & Timeline</h2>
+      <h2 className="dashboard-title">{t.deadlines}</h2>
 
       <div className="timeline-input-row">
         <input
           type="text"
-          placeholder="Task name (e.g. Math assignment)"
+          placeholder={t.taskPlaceholder}
           value={taskName}
           onChange={(e) => setTaskName(e.target.value)}
           className="timeline-task-input"
@@ -60,12 +60,12 @@ function Timeline() {
           onChange={(e) => setDueDate(e.target.value)}
           className="timeline-date-input"
         />
-        <button onClick={addTask} className="timeline-add-button">Add</button>
+        <button onClick={addTask} className="timeline-add-button">{t.add}</button>
       </div>
 
       <div className="timeline-list">
         {sortedTasks.length === 0 && (
-          <p className="timeline-empty">No deadlines yet. Add one above.</p>
+          <p className="timeline-empty">{t.noDeadlines}</p>
         )}
 
         {sortedTasks.map(task => {

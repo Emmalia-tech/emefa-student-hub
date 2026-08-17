@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-function Chatbot({ onActivity }) {
+function Chatbot({ onActivity, t }) {
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Hi! I\'m your AI study assistant. Ask me anything about your coursework.' }
   ])
@@ -58,7 +58,7 @@ function Chatbot({ onActivity }) {
 
   return (
     <div className="chatbot-container">
-      <div className="chatbot-header">Emefa AI Assistant</div>
+      <div className="chatbot-header">{t.aiAssistant}</div>
 
       <div className="chatbot-messages">
         {messages.map((msg, index) => (
@@ -78,12 +78,12 @@ function Chatbot({ onActivity }) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder="Type your question..."
+          placeholder={t.typeQuestion}
         />
         <button onClick={handleVoiceInput} className="mic-button">
           {isListening ? '🔴' : '🎤'}
         </button>
-        <button onClick={handleSend}>Send</button>
+        <button onClick={handleSend}>{t.send}</button>
       </div>
     </div>
   )
