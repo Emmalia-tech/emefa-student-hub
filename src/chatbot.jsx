@@ -6,18 +6,37 @@ function Chatbot({ onActivity, t }) {
   ])
   const [input, setInput] = useState('')
   const [isListening, setIsListening] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() === '') return
 
     const userMessage = { sender: 'user', text: input }
-    setMessages([...messages, userMessage])
+    const currentInput = input
+    setMessages(prev => [...prev, userMessage])
     setInput('')
+    setIsLoading(true)
     onActivity()
 
-    setTimeout(() => {
-      setMessages(prev => [...prev, { sender: 'bot', text: 'This is a placeholder reply. AI responses coming soon!' }])
-    }, 500)
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: currentInput })
+      })
+
+      const data = await response.json()
+
+      if (data.error) {
+        setMessages(prev => [...prev, { sender: 'bot', text: `Error: ${data.error}` }])
+      } else {
+        setMessages(prev => [...prev, { sender: 'bot', text: data.reply }])
+      }
+    } catch (error) {
+      setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, something went wrong. Please try again.' }])
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleVoiceInput = () => {
@@ -66,6 +85,9 @@ function Chatbot({ onActivity, t }) {
             {msg.text}
           </div>
         ))}
+        {isLoading && (
+          <div className="message bot">Thinking...</div>
+        )}
       </div>
 
       <div className="chatbot-input-area">
