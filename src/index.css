@@ -409,3 +409,33 @@ body {
 .notif-enable-button:hover {
   background-color: #d97706;
 }
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 80px 40px;
+  max-width: 1100px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.hero-content {
+  flex: 1;
+}
+
+.hero-banner {
+  flex: 1;
+  max-width: 400px;
+  width: 100%;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 20px;
+  }
+}

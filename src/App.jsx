@@ -4,6 +4,7 @@ import Dashboard from './Dashboard'
 import Quote from './Quote'
 import Timeline from './Timeline'
 import { translations } from './translations'
+import banner from './assets/banner.jpg'
 
 function getTodayString() {
   const today = new Date()
@@ -107,10 +108,13 @@ function App() {
       </nav>
 
       <header className="hero">
-        <h2>{t.heroTitle}</h2>
-        <p>{t.heroSubtitle}</p>
-        <button className="cta-button">{t.getStarted}</button>
-      </header>
+  <div className="hero-content">
+    <h2>{t.heroTitle}</h2>
+    <p>{t.heroSubtitle}</p>
+    <button className="cta-button">{t.getStarted}</button>
+  </div>
+  <img src={banner} alt="Emefa" className="hero-banner" />
+</header>
 
       <Quote />
       <Dashboard stats={stats} updateGoal={updateGoal} t={t} />
