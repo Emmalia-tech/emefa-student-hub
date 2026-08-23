@@ -30,7 +30,8 @@ function Chatbot({ onActivity, t }) {
       if (data.error) {
         setMessages(prev => [...prev, { sender: 'bot', text: `Error: ${data.error}` }])
       } else {
-        setMessages(prev => [...prev, { sender: 'bot', text: data.reply }])
+    const cleanReply = data.reply.replace(/\*\*/g, '').replace(/#{1,6}\s?/g, '').replace(/\*/g, '')
+setMessages(prev => [...prev, { sender: 'bot', text: cleanReply }])
       }
     } catch (error) {
       setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, something went wrong. Please try again.' }])

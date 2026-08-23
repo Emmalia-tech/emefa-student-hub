@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: message }] }]
+          contents: [{ parts: [{ text: `Respond in plain, simple text only. Do not use markdown formatting like asterisks, hashtags, or bullet symbols. Write naturally as if speaking directly to a student.\n\nStudent's question: ${message}` }] }]
         })
       }
     )
