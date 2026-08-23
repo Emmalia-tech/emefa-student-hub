@@ -4,6 +4,8 @@ import Dashboard from './Dashboard'
 import Quote from './Quote'
 import Timeline from './Timeline'
 import { translations } from './translations'
+import { auth, googleProvider } from './firebase'
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
 import banner from './assets/banner.jpg'
 
 function getTodayString() {
@@ -34,6 +36,25 @@ function calculateStreak(lastVisit, currentStreak) {
 }
 
 function App() {
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const handleSignIn = () => {
+    signInWithPopup(auth, googleProvider).catch((error) => {
+      console.error('Sign-in error:', error)
+    })
+  }
+
+  const handleSignOut = () => {
+    signOut(auth)
+  }
+
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('emefaLanguage') || 'en'
   })
@@ -86,35 +107,46 @@ function App() {
     <div className="landing">
       <nav className="navbar">
         <h1 className="logo">Emefa Student Hub</h1>
-        <select
-          className="language-select"
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-        >
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-          <option value="es">Español</option>
-          <option value="ewe">Eʋegbe</option>
-          <option value="twi">Twi</option>
-          <option value="ga">Ga</option>
-          <option value="pt">Português</option>
-          <option value="de">Deutsch</option>
-          <option value="it">Italiano</option>
-          <option value="ar">العربية</option>
-          <option value="sw">Kiswahili</option>
-          <option value="zh">中文</option>
-          <option value="hi">हिन्दी</option>
-        </select>
+        <div className="navbar-right">
+          {user ? (
+            <div className="user-info">
+              <img src={user.photoURL} alt={user.displayName} className="user-avatar" />
+              <span className="user-name">{user.displayName}</span>
+              <button onClick={handleSignOut} className="sign-out-button">Sign Out</button>
+            </div>
+          ) : (
+            <button onClick={handleSignIn} className="sign-in-button">Sign in with Google</button>
+          )}
+          <select
+            className="language-select"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+          >
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="ewe">Eʋegbe</option>
+            <option value="twi">Twi</option>
+            <option value="ga">Ga</option>
+            <option value="pt">Português</option>
+            <option value="de">Deutsch</option>
+            <option value="it">Italiano</option>
+            <option value="ar">العربية</option>
+            <option value="sw">Kiswahili</option>
+            <option value="zh">中文</option>
+            <option value="hi">हिन्दी</option>
+          </select>
+        </div>
       </nav>
 
       <header className="hero">
-  <div className="hero-content">
-    <h2>{t.heroTitle}</h2>
-    <p>{t.heroSubtitle}</p>
-    <button className="cta-button">{t.getStarted}</button>
-  </div>
-  <img src={banner} alt="Emefa" className="hero-banner" />
-</header>
+        <div className="hero-content">
+          <h2>{t.heroTitle}</h2>
+          <p>{t.heroSubtitle}</p>
+          <button className="cta-button">{t.getStarted}</button>
+        </div>
+        <img src={banner} alt="Emefa" className="hero-banner" />
+      </header>
 
       <Quote />
       <Dashboard stats={stats} updateGoal={updateGoal} t={t} />
