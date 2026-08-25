@@ -151,7 +151,7 @@ function App() {
       <Quote />
       <Dashboard stats={stats} updateGoal={updateGoal} t={t} />
       <Timeline t={t} />
-      <Chatbot onActivity={addStudyActivity} t={t} />
+      <Chatbot onActivity={addStudyActivity} t={t} user={user} />
     </div>
   )
 }

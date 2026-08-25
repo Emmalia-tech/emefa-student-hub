@@ -3,20 +3,35 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const { message } = req.body
+  const { message, imageBase64, imageMimeType } = req.body
 
-  if (!message) {
-    return res.status(400).json({ error: 'Message is required' })
+  if (!message && !imageBase64) {
+    return res.status(400).json({ error: 'Message or image is required' })
   }
 
   try {
+    const parts = []
+
+    if (message) {
+      parts.push({ text: message })
+    }
+
+    if (imageBase64) {
+      parts.push({
+        inline_data: {
+          mime_type: imageMimeType,
+          data: imageBase64
+        }
+      })
+    }
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Respond in plain, simple text only. Do not use markdown formatting like asterisks, hashtags, or bullet symbols. Write naturally as if speaking directly to a student.\n\nStudent's question: ${message}` }] }]
+          contents: [{ parts }]
         })
       }
     )
