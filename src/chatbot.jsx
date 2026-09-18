@@ -1,8 +1,43 @@
 import { useState } from 'react'
 import { db } from './firebase'
 import { collection, addDoc, updateDoc, doc, query, where, orderBy, getDocs } from 'firebase/firestore'
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf'
 
-function Chatbot({ onActivity, t, user }) {
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+
+const languageNames = {
+  en: 'English',
+  fr: 'French',
+  es: 'Spanish',
+  ewe: 'Ewe',
+  twi: 'Twi',
+  ga: 'Ga',
+  pt: 'Portuguese',
+  de: 'German',
+  it: 'Italian',
+  ar: 'Arabic',
+  sw: 'Swahili',
+  zh: 'Chinese',
+  hi: 'Hindi'
+}
+
+const speechLangCodes = {
+  en: 'en-US',
+  fr: 'fr-FR',
+  es: 'es-ES',
+  pt: 'pt-PT',
+  de: 'de-DE',
+  it: 'it-IT',
+  ar: 'ar-SA',
+  sw: 'sw-KE',
+  zh: 'zh-CN',
+  hi: 'hi-IN',
+  twi: 'en-US',
+  ewe: 'en-US',
+  ga: 'en-US'
+}
+
+function Chatbot({ onActivity, t, user, language }) {
   const [messages, setMessages] = useState([
     { sender: 'bot', text: 'Hi! I\'m your AI study assistant. Ask me anything about your coursework.' }
   ])
@@ -13,6 +48,10 @@ function Chatbot({ onActivity, t, user }) {
   const [showHistory, setShowHistory] = useState(false)
   const [history, setHistory] = useState([])
   const [loadingHistory, setLoadingHistory] = useState(false)
+
+  const getLanguageInstruction = () => {
+    return `Respond only in ${languageNames[language] || 'English'}, regardless of what language the question is asked in. `
+  }
 
   const startNewConversation = () => {
     setMessages([
@@ -94,7 +133,7 @@ function Chatbot({ onActivity, t, user }) {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: currentInput })
+        body: JSON.stringify({ message: getLanguageInstruction() + currentInput })
       })
 
       const data = await response.json()
@@ -126,7 +165,7 @@ function Chatbot({ onActivity, t, user }) {
     }
 
     const recognition = new SpeechRecognition()
-    recognition.lang = 'en-US'
+    recognition.lang = speechLangCodes[language] || 'en-US'
     recognition.interimResults = false
 
     recognition.onstart = () => setIsListening(true)
@@ -140,14 +179,31 @@ function Chatbot({ onActivity, t, user }) {
     recognition.start()
   }
 
+  const extractTextFromPDF = async (file) => {
+    const arrayBuffer = await file.arrayBuffer()
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+    let fullText = ''
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i)
+      const content = await page.getTextContent()
+      const pageText = content.items.map(item => item.str).join(' ')
+      fullText += pageText + '\n'
+    }
+
+    return fullText
+  }
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0]
     if (!file) return
 
     const isImage = file.type.startsWith('image/')
+    const isPDF = file.type === 'application/pdf'
+    const isText = file.type === 'text/plain'
 
-    if (!isImage) {
-      setMessages(prev => [...prev, { sender: 'bot', text: 'Right now I can only analyze images. Text file support is coming soon!' }])
+    if (!isImage && !isPDF && !isText) {
+      setMessages(prev => [...prev, { sender: 'bot', text: 'I can currently analyze images, PDFs, and text files. Other file types coming soon!' }])
       return
     }
 
@@ -157,21 +213,38 @@ function Chatbot({ onActivity, t, user }) {
     setIsLoading(true)
 
     try {
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result.split(',')[1])
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
+      let requestBody = {}
+      const langInstruction = getLanguageInstruction()
+
+      if (isImage) {
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result.split(',')[1])
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
+
+        requestBody = {
+          message: langInstruction + 'Please analyze this image and describe what you see. If it contains text or a question, help explain or answer it.',
+          imageBase64: base64,
+          imageMimeType: file.type
+        }
+      } else if (isPDF) {
+        const extractedText = await extractTextFromPDF(file)
+        requestBody = {
+          message: langInstruction + `Please summarize and explain the key points of this document:\n\n${extractedText.slice(0, 8000)}`
+        }
+      } else if (isText) {
+        const text = await file.text()
+        requestBody = {
+          message: langInstruction + `Please summarize and explain the key points of this document:\n\n${text.slice(0, 8000)}`
+        }
+      }
 
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: 'Please analyze this image and describe what you see. If it contains text or a question, help explain or answer it.',
-          imageBase64: base64,
-          imageMimeType: file.type
-        })
+        body: JSON.stringify(requestBody)
       })
 
       const data = await response.json()
@@ -188,7 +261,7 @@ function Chatbot({ onActivity, t, user }) {
         saveConversation(finalMessages)
       }
     } catch (error) {
-      setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I had trouble analyzing that image.' }])
+      setMessages(prev => [...prev, { sender: 'bot', text: 'Sorry, I had trouble analyzing that file.' }])
     } finally {
       setIsLoading(false)
     }
