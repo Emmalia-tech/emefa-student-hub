@@ -5,7 +5,7 @@ import Quote from './Quote'
 import Timeline from './Timeline'
 import { translations } from './translations'
 import { auth, googleProvider } from './firebase'
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth'
+import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth'
 import banner from './assets/banner.jpg'
 
 function getTodayString() {
@@ -37,17 +37,26 @@ function calculateStreak(lastVisit, currentStreak) {
 
 function App() {
   const [user, setUser] = useState(null)
+  const [authError, setAuthError] = useState(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser)
     })
+
+    getRedirectResult(auth).catch((error) => {
+      console.error('Redirect sign-in error:', error)
+      setAuthError(error.message)
+    })
+
     return () => unsubscribe()
   }, [])
 
   const handleSignIn = () => {
-    signInWithPopup(auth, googleProvider).catch((error) => {
+    setAuthError(null)
+    signInWithRedirect(auth, googleProvider).catch((error) => {
       console.error('Sign-in error:', error)
+      setAuthError(error.message)
     })
   }
 
@@ -103,6 +112,13 @@ function App() {
     }))
   }
 
+  const scrollToChatbot = () => {
+    const el = document.getElementById('chatbot-section')
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
     <div className="landing">
       <nav className="navbar">
@@ -139,11 +155,17 @@ function App() {
         </div>
       </nav>
 
+      {authError && (
+        <div style={{ background: '#fef2f2', color: '#b91c1c', padding: '10px 20px', fontSize: '13px', textAlign: 'center' }}>
+          Sign-in error: {authError}
+        </div>
+      )}
+
       <header className="hero">
         <div className="hero-content">
           <h2>{t.heroTitle}</h2>
           <p>{t.heroSubtitle}</p>
-          <button className="cta-button">{t.getStarted}</button>
+          <button className="cta-button" onClick={scrollToChatbot}>{t.getStarted}</button>
         </div>
         <img src={banner} alt="Emefa" className="hero-banner" />
       </header>
@@ -151,7 +173,9 @@ function App() {
       <Quote />
       <Dashboard stats={stats} updateGoal={updateGoal} t={t} />
       <Timeline t={t} />
-      <Chatbot onActivity={addStudyActivity} t={t} user={user} language={language} />
+      <div id="chatbot-section">
+        <Chatbot onActivity={addStudyActivity} t={t} user={user} language={language} />
+      </div>
     </div>
   )
 }
