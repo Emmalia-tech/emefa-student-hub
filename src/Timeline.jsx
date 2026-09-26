@@ -7,35 +7,38 @@ function Timeline({ t }) {
   })
   const [taskName, setTaskName] = useState('')
   const [dueDate, setDueDate] = useState('')
-  const [notifPermission, setNotifPermission] = useState(Notification.permission)
+ const [notifPermission, setNotifPermission] = useState(
+  typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+)
 
   useEffect(() => {
     localStorage.setItem('emefaTasks', JSON.stringify(tasks))
   }, [tasks])
+useEffect(() => {
+  if (typeof Notification === 'undefined') return
+  if (notifPermission !== 'granted') return
 
-  useEffect(() => {
-    if (notifPermission !== 'granted') return
+  tasks.forEach(task => {
+    const daysLeft = getDaysLeft(task.dueDate)
+    const alreadyNotified = localStorage.getItem(`notified-${task.id}`)
 
-    tasks.forEach(task => {
-      const daysLeft = getDaysLeft(task.dueDate)
-      const alreadyNotified = localStorage.getItem(`notified-${task.id}`)
-
-      if ((daysLeft === 1 || daysLeft === 0) && !alreadyNotified) {
-        new Notification('Emefa Student Hub Reminder', {
-          body: daysLeft === 0
-            ? `"${task.name}" is due today!`
-            : `"${task.name}" is due tomorrow!`
-        })
-        localStorage.setItem(`notified-${task.id}`, 'true')
-      }
-    })
-  }, [tasks, notifPermission])
+    if ((daysLeft === 1 || daysLeft === 0) && !alreadyNotified) {
+      new Notification('Emefa Student Hub Reminder', {
+        body: daysLeft === 0
+          ? `"${task.name}" is due today!`
+          : `"${task.name}" is due tomorrow!`
+      })
+      localStorage.setItem(`notified-${task.id}`, 'true')
+    }
+  })
+}, [tasks, notifPermission])
 
   const requestNotificationPermission = () => {
-    Notification.requestPermission().then(permission => {
-      setNotifPermission(permission)
-    })
-  }
+  if (typeof Notification === 'undefined') return
+  Notification.requestPermission().then(permission => {
+    setNotifPermission(permission)
+  })
+}
 
   const addTask = () => {
     if (taskName.trim() === '' || dueDate === '') return
@@ -72,14 +75,14 @@ function Timeline({ t }) {
     <div className="timeline-container">
       <h2 className="dashboard-title">{t.deadlines}</h2>
 
-      {notifPermission !== 'granted' && (
-        <div className="notif-banner">
-          <p>Enable notifications to get reminded about upcoming deadlines.</p>
-          <button onClick={requestNotificationPermission} className="notif-enable-button">
-            Enable Notifications
-          </button>
-        </div>
-      )}
+      {notifPermission !== 'granted' && notifPermission !== 'unsupported' && (
+  <div className="notif-banner">
+    <p>Enable notifications to get reminded about upcoming deadlines.</p>
+    <button onClick={requestNotificationPermission} className="notif-enable-button">
+      Enable Notifications
+    </button>
+  </div>
+)}
 
       <div className="timeline-input-row">
         <input
