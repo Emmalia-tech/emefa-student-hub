@@ -9,37 +9,50 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Message or image is required' })
   }
 
-  try {
-    const parts = []
+  const parts = []
+  if (message) parts.push({ text: message })
+  if (imageBase64) {
+    parts.push({
+      inline_data: {
+        mime_type: imageMimeType,
+        data: imageBase64
+      }
+    })
+  }
 
-    if (message) {
-      parts.push({ text: message })
-    }
-
-    if (imageBase64) {
-      parts.push({
-        inline_data: {
-          mime_type: imageMimeType,
-          data: imageBase64
-        }
-      })
-    }
-
+  const callGemini = async () => {
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts }]
-        })
+        body: JSON.stringify({ contents: [{ parts }] })
       }
     )
+    return response.json()
+  }
 
-    const data = await response.json()
+  try {
+    let data = await callGemini()
+
+    const isOverloaded = data.error && (
+      data.error.message?.toLowerCase().includes('overloaded') ||
+      data.error.message?.toLowerCase().includes('high demand') ||
+      data.error.code === 503
+    )
+
+    if (isOverloaded) {
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      data = await callGemini()
+    }
 
     if (data.error) {
-      return res.status(500).json({ error: data.error.message })
+      const friendlyMessage = data.error.message?.toLowerCase().includes('overloaded') ||
+        data.error.message?.toLowerCase().includes('high demand')
+        ? 'The AI is quite busy right now. Please try sending your message again in a moment.'
+        : data.error.message
+
+      return res.status(500).json({ error: friendlyMessage })
     }
 
     const reply = data.candidates[0].content.parts[0].text
